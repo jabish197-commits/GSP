@@ -1,0 +1,1 @@
+export default function AdminHeader({admin={},title}){return <header><div><p className="kicker">SJ GUPPY PARADISE</p><h1>{title}</h1></div><div className="admin-user"><span>{admin.name?.[0]||"A"}</span><div><b>{admin.name}</b><small>{admin.email}</small></div></div></header>}

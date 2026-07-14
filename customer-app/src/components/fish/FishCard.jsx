@@ -1,0 +1,4 @@
+import { Link } from "react-router-dom";
+import AvailabilityBadge from "./AvailabilityBadge.jsx";
+import { formatCurrency } from "../../utils/currency.js";
+export default function FishCard({ fish, onAdd }) { const image=fish.media?.find(item=>item.type==="image"); return <article className="fish-card"><Link className="fish-image" to={`/fish/${fish.slug||fish._id}`}>{image?<img src={image.url} alt={image.alt||fish.name}/>:<div className="fish-placeholder">SJ<span>GUPPY</span></div>}<AvailabilityBadge status={fish.status}/></Link><div className="fish-body"><p className="eyebrow">{fish.strain}</p><h3>{fish.name}</h3><div className="price-row"><strong>{formatCurrency(fish.price)}</strong><small>{fish.quantity} available</small></div><button disabled={fish.status!=="available"} onClick={()=>onAdd?.(fish)}>Add enquiry</button></div></article>; }

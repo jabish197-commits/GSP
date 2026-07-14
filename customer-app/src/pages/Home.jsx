@@ -1,0 +1,1 @@
+import { Link } from "react-router-dom"; export default function Home(){return <main className="page"><p className="eyebrow">Home-bred guppies</p><h1>SJ Guppy Paradise</h1><p>Healthy, colourful freshwater guppies raised with care.</p><Link className="primary" to="/collection">View available guppies</Link></main>}

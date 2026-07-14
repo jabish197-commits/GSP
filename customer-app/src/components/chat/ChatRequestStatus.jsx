@@ -1,0 +1,1 @@
+export default function ChatRequestStatus({ status }) { const labels={ai:"AI assistance",pending:"Waiting for breeder",accepted:"Breeder accepted",active:"Live with breeder",closed:"Conversation closed"}; return <span className={`chat-status ${status}`}>{labels[status]||status}</span>; }

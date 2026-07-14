@@ -1,0 +1,1 @@
+export default function OrderDetails({order}){if(!order)return null;return <section className="panel"><h2>{order.orderNumber}</h2><p>{order.customer.name} · {order.customer.phone}</p><ul>{order.items.map(item=><li key={item._id}>{item.name} × {item.quantity}</li>)}</ul><strong>₹{order.total}</strong></section>}

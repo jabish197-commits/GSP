@@ -1,0 +1,1 @@
+import AdminHeader from"./AdminHeader.jsx";import AdminSidebar from"./AdminSidebar.jsx";export default function AdminLayout({admin,page,onNavigate,onLogout,children}){return <div className="admin-shell"><AdminSidebar page={page} onNavigate={onNavigate} onLogout={onLogout}/><main className="admin-main"><AdminHeader admin={admin} title={page}/>{children}</main></div>}

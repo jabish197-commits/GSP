@@ -1,0 +1,1 @@
+export const sanitizeText=value=>String(value??"").replace(/[<>]/g,"").trim();export const sanitizeObject=value=>Object.fromEntries(Object.entries(value||{}).map(([key,item])=>[key,typeof item==="string"?sanitizeText(item):item]));

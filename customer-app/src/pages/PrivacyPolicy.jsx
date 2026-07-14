@@ -1,0 +1,1 @@
+export default function PrivacyPolicy(){return <main className="page"><h1>Privacy policy</h1><p>Customer contact details are used only to respond to enquiries, arrange orders, and provide support.</p></main>}

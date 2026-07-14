@@ -1,0 +1,1 @@
+import{useEffect,useState}from"react";import{io}from"socket.io-client";export default function useAdminSocket(){const[socket,setSocket]=useState(null);useEffect(()=>{const instance=io(import.meta.env.VITE_SOCKET_URL||"http://localhost:5000",{withCredentials:true});instance.emit("join-admin");setSocket(instance);return()=>instance.close()},[]);return socket}

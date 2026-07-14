@@ -1,0 +1,1 @@
+import ChatRequestCard from"./ChatRequestCard.jsx";export default function ChatRequestList({chats=[],onSelect}){return <aside>{chats.map(chat=><ChatRequestCard key={chat._id} chat={chat} onSelect={onSelect}/>)}{!chats.length&&<p>No chats yet.</p>}</aside>}

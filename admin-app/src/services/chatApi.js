@@ -1,0 +1,1 @@
+import{api}from"./api.js";export const listChats=()=>api("/chat/admin");export const setChatStatus=(id,status)=>api(`/chat/admin/${id}/status`,{method:"PATCH",body:JSON.stringify({status})});export const replyToChat=(id,text)=>api(`/chat/admin/${id}/message`,{method:"POST",body:JSON.stringify({text})});

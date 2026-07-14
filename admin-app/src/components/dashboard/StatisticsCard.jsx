@@ -1,0 +1,1 @@
+export default function StatisticsCard({label,value,action,onClick,attention=false}){return <article className={attention?"attention":""}><small>{label}</small><strong>{value}</strong>{action&&<button onClick={onClick}>{action} →</button>}</article>}

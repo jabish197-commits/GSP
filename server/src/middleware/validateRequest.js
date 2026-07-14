@@ -1,0 +1,1 @@
+export default function validateRequest(schema){return(request,response,next)=>{const result=schema.safeParse({body:request.body,params:request.params,query:request.query});if(!result.success)return response.status(400).json({message:"Invalid request.",details:result.error.flatten()});request.validated=result.data;next()}}

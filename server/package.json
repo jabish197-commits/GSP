@@ -1,0 +1,32 @@
+{
+  "name": "server",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node --use-system-ca --watch src/server.js",
+    "start": "node --use-system-ca src/server.js",
+    "create-admin": "node --use-system-ca src/scripts/createInitialAdmin.js",
+    "reset-admin-password": "node --use-system-ca src/scripts/resetAdminPassword.js",
+    "seed": "node --use-system-ca src/scripts/seedDemoFish.js",
+    "check": "node --check src/server.js && node --check src/app.js",
+    "test": "node --test tests/*.test.js"
+  },
+  "dependencies": {
+    "bcryptjs": "latest",
+    "cloudinary": "latest",
+    "cookie-parser": "latest",
+    "cors": "latest",
+    "dotenv": "latest",
+    "express": "latest",
+    "express-rate-limit": "latest",
+    "helmet": "latest",
+    "jsonwebtoken": "latest",
+    "mongoose": "latest",
+    "multer": "latest",
+    "openai": "latest",
+    "slugify": "latest",
+    "socket.io": "latest",
+    "zod": "latest"
+  }
+}

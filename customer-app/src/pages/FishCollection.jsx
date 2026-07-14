@@ -1,0 +1,1 @@
+import FishGrid from "../components/fish/FishGrid.jsx"; export default function FishCollection({fish,onAdd}){return <main className="page"><h1>Available guppies</h1><FishGrid fish={fish} onAdd={onAdd}/></main>}

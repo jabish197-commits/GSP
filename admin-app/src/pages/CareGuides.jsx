@@ -1,0 +1,1 @@
+export default function CareGuides({tips=[]}){return <section className="panel"><h2>Care guides</h2>{tips.map((tip,index)=><article key={index}><h3>{tip.title}</h3><p>{tip.text}</p></article>)}</section>}

@@ -1,0 +1,1 @@
+export default function chatSocket(io,socket){socket.on("join-chat",sessionId=>socket.join(`chat:${sessionId}`));socket.on("chat-typing",sessionId=>socket.to(`chat:${sessionId}`).emit("chat-typing"))}

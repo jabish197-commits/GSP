@@ -1,0 +1,1 @@
+import DataTable from"../common/DataTable.jsx";export default function RecentActivity({orders=[]}){return <DataTable rows={orders.slice(0,5)} columns={[{key:"orderNumber",label:"Reference"},{key:"customer",label:"Customer",render:r=>r.customer.name},{key:"total",label:"Value",render:r=>`₹${r.total}`},{key:"status",label:"Status"}]}/>}

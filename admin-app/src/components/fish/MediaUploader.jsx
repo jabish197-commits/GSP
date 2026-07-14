@@ -1,0 +1,1 @@
+export default function MediaUploader({uploading,onUpload,media=[]}){return <label className="upload">Images or videos<input type="file" accept="image/*,video/*" onChange={e=>onUpload(e.target.files[0])}/><span>{uploading?"Uploading…":`${media.length} files attached`}</span></label>}

@@ -1,0 +1,1 @@
+import EnquiryForm from "../components/orders/EnquiryForm.jsx";import OrderSummary from "../components/orders/OrderSummary.jsx";export default function OrderEnquiry({items,onSubmit,onRemove}){return <main className="page enquiry"><OrderSummary items={items} onRemove={onRemove}/><EnquiryForm onSubmit={onSubmit} disabled={!items.length}/></main>}

@@ -1,0 +1,1 @@
+import{z}from"zod";export const phoneSchema=z.string().regex(/^[+\d][\d\s-]{7,}$/);export const objectIdSchema=z.string().regex(/^[a-f\d]{24}$/i);export const paginationSchema=z.object({page:z.coerce.number().int().positive().default(1),limit:z.coerce.number().int().min(1).max(100).default(20)});

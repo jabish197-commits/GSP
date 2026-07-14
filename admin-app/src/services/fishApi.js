@@ -1,0 +1,1 @@
+import{api}from"./api.js";export const listFish=()=>api("/fish");export const createFish=body=>api("/fish",{method:"POST",body:JSON.stringify(body)});export const updateFish=(id,body)=>api(`/fish/${id}`,{method:"PUT",body:JSON.stringify(body)});export const deleteFish=id=>api(`/fish/${id}`,{method:"DELETE"});

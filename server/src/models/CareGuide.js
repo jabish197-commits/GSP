@@ -1,0 +1,1 @@
+import mongoose from"mongoose";const schema=new mongoose.Schema({title:{type:String,required:true,trim:true},slug:{type:String,required:true,unique:true},summary:String,content:{type:String,required:true},published:{type:Boolean,default:true},order:{type:Number,default:0}},{timestamps:true});export default mongoose.models.CareGuide||mongoose.model("CareGuide",schema);

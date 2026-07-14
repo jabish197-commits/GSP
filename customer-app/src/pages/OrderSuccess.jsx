@@ -1,0 +1,1 @@
+import {Link} from "react-router-dom";export default function OrderSuccess({reference}){return <main className="page success"><span>✓</span><h1>Enquiry received</h1><p>Reference: <b>{reference}</b></p><Link className="primary" to="/">Return home</Link></main>}

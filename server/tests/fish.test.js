@@ -1,0 +1,1 @@
+import test from"node:test";import assert from"node:assert/strict";import{fishBody}from"../src/validators/fishValidator.js";test("valid fish input passes",()=>assert.equal(fishBody.safeParse({name:"Blue Topaz",strain:"Topaz",description:"Healthy breeder-selected guppy pair.",price:550,quantity:2,sex:"pair",status:"available"}).success,true));

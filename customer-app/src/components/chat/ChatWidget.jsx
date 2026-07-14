@@ -1,0 +1,2 @@
+import { useChat } from "../../contexts/ChatContext.jsx"; import ChatMessage from "./ChatMessage.jsx";
+export default function ChatWidget(){const{chat,sendMessage}=useChat();return <section className="chat-widget-module">{chat?.messages?.map(message=><ChatMessage key={message._id||message.createdAt} message={message}/>)}<form onSubmit={e=>{e.preventDefault();const text=new FormData(e.currentTarget).get("text");sendMessage(text);e.currentTarget.reset()}}><input name="text" placeholder="Ask about guppies"/><button>Send</button></form></section>}

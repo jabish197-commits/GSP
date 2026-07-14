@@ -1,0 +1,1 @@
+export default function ChatRequestCard({chat,onSelect}){return <button onClick={()=>onSelect(chat)}><span>{chat.customerName?.[0]||"G"}</span><div><b>{chat.customerName}</b><small>{chat.messages?.at(-1)?.text}</small></div><i className={chat.status}>{chat.status}</i></button>}

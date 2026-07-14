@@ -1,0 +1,1 @@
+export async function notifyNewEnquiry(order){if(!process.env.NOTIFICATION_WEBHOOK_URL)return{sent:false,reason:"No webhook configured"};const response=await fetch(process.env.NOTIFICATION_WEBHOOK_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({event:"new-enquiry",orderNumber:order.orderNumber,total:order.total})});return{sent:response.ok}}

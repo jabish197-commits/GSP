@@ -1,0 +1,78 @@
+.chat-desk > main {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.admin-messages {
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: #8baaa8 #e8f0ef;
+}
+
+.admin-messages::-webkit-scrollbar {
+  width: 10px;
+}
+
+.admin-messages::-webkit-scrollbar-track {
+  background: #e8f0ef;
+}
+
+.admin-messages::-webkit-scrollbar-thumb {
+  background: #8baaa8;
+  border: 2px solid #e8f0ef;
+  border-radius: 999px;
+}
+
+.admin-messages p {
+  overflow-wrap: anywhere;
+}
+
+.admin-messages .message-actions {
+  display: flex;
+  gap: .35rem;
+  margin-top: .55rem;
+}
+
+.admin-messages .message-actions button {
+  padding: .25rem .5rem;
+  border: 1px solid #bbcfcd;
+  border-radius: 5px;
+  background: #fff;
+  color: #31596a;
+  font-size: .7rem;
+  cursor: pointer;
+}
+
+.admin-messages .message-actions button:last-child {
+  color: #a53a32;
+}
+
+.admin-messages img {
+  display: block;
+  width: 220px;
+  max-width: 100%;
+  max-height: 300px;
+  margin-top: .7rem;
+  border-radius: 8px;
+  object-fit: contain;
+}
+
+.chat-desk > main > .admin-reply-form {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  flex: 0 0 auto;
+  background: #fff;
+  box-shadow: 0 -4px 14px rgba(18, 52, 76, .08);
+}
+
+@media (max-width: 780px) {
+  .chat-desk > main {
+    height: min(680px, 75vh);
+    min-height: 520px;
+  }
+}

@@ -1,0 +1,1 @@
+import{uploadBuffer}from"../services/mediaService.js";export async function uploadMedia(request,response){if(!request.file)return response.status(400).json({message:"Select a file."});response.status(201).json({media:await uploadBuffer(request.file)})}

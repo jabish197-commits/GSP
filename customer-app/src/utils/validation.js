@@ -1,0 +1,1 @@
+export function validateContact({name,phone}){const errors={};if(!name?.trim())errors.name="Name is required.";if(!/^[+\d][\d\s-]{7,}$/.test(phone||""))errors.phone="Enter a valid phone number.";return errors}

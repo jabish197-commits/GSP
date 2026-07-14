@@ -1,0 +1,25 @@
+.instagram-nav {
+  color: #c13584;
+  font-weight: 800;
+}
+
+.instagram-link {
+  display: inline-flex;
+  align-items: center;
+  gap: .55rem;
+  margin-top: .5rem;
+  padding: .7rem 1rem;
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 999px;
+  color: white;
+  font-weight: 800;
+}
+
+.instagram-link:hover {
+  border-color: #e1306c;
+  background: #e1306c;
+}
+
+.instagram-link span {
+  font-size: 1.3rem;
+}

@@ -1,0 +1,1 @@
+import MediaUploader from"../components/fish/MediaUploader.jsx";export default function ManageMedia(props){return <section className="panel"><h2>Media library</h2><MediaUploader {...props}/></section>}

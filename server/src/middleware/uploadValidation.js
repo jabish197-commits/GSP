@@ -1,0 +1,1 @@
+const allowed=new Set(["image/jpeg","image/png","image/webp","video/mp4","video/webm"]);export function validateUpload(_request,file,callback){if(!allowed.has(file.mimetype))return callback(new Error("Only JPG, PNG, WebP, MP4, and WebM files are allowed."));callback(null,true)}

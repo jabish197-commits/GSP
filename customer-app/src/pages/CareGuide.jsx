@@ -1,0 +1,1 @@
+export default function CareGuide(){return <main className="page"><h1>Guppy care guide</h1><h2>Stable water</h2><p>Use a fully cycled aquarium around 24–28°C and avoid sudden changes.</p><h2>Feeding</h2><p>Offer small portions of quality food once or twice daily.</p></main>}

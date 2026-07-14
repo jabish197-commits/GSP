@@ -1,0 +1,1 @@
+import FishForm from"../components/fish/FishForm.jsx";export default function EditFish({fish,onSave,onCancel}){return <section className="panel"><h2>Edit guppy</h2><FishForm fish={fish} onSave={onSave} onCancel={onCancel}/></section>}

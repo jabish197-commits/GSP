@@ -1,0 +1,1 @@
+import{Router}from"express";import{requireAdmin}from"../middleware/adminAuth.js";import asyncHandler from"../utils/asyncHandler.js";import{dashboardSummary}from"../controllers/dashboardController.js";const router=Router();router.get("/",requireAdmin,asyncHandler(dashboardSummary));export default router;

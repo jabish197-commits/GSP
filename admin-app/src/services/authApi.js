@@ -1,0 +1,1 @@
+import{api}from"./api.js";export const login=body=>api("/auth/login",{method:"POST",body:JSON.stringify(body)});export const getMe=()=>api("/auth/me");export const logout=()=>api("/auth/logout",{method:"POST"});

@@ -1,0 +1,1 @@
+import mongoose from"mongoose";const schema=new mongoose.Schema({chatRequest:{type:mongoose.Schema.Types.ObjectId,ref:"ChatRequest",required:true,index:true},sender:{type:String,enum:["customer","ai","admin","system"],required:true},text:{type:String,required:true,maxlength:2000}},{timestamps:true});export default mongoose.models.ChatMessage||mongoose.model("ChatMessage",schema);

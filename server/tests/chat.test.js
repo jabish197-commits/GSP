@@ -1,0 +1,1 @@
+import test from"node:test";import assert from"node:assert/strict";import{chatMessageSchema}from"../src/validators/chatValidator.js";test("empty chat message fails",()=>assert.equal(chatMessageSchema.safeParse({body:{text:""},params:{sessionId:"session-123"},query:{}}).success,false));

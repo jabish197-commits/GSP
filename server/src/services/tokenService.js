@@ -1,0 +1,1 @@
+import jwt from"jsonwebtoken";export const createAccessToken=admin=>jwt.sign({sub:admin.id,role:admin.role},process.env.JWT_ACCESS_SECRET,{expiresIn:process.env.JWT_ACCESS_EXPIRES_IN||"8h"});export const verifyAccessToken=token=>jwt.verify(token,process.env.JWT_ACCESS_SECRET);

@@ -1,0 +1,1 @@
+import ChatRequestList from"../components/chat/ChatRequestList.jsx";export default function ChatRequests(props){return <section className="panel"><h2>Chat requests</h2><ChatRequestList {...props}/></section>}
