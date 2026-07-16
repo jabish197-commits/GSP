@@ -58,9 +58,10 @@ function OrderTable({orders,update,updatePayment}) {
 function Orders({orders,reload}) {const update=async(id,status)=>{await api(`/orders/${id}/status`,{method:"PATCH",body:JSON.stringify({status})});reload()};const updatePayment=async(id,paymentStatus)=>{await api(`/orders/${id}/payment-status`,{method:"PATCH",body:JSON.stringify({paymentStatus})});reload()};return <section className="panel"><div className="panel-head"><div><p className="kicker">CUSTOMER REQUESTS</p><h2>All enquiries</h2></div></div><OrderTable orders={orders} update={update} updatePayment={updatePayment}/></section>}
 
 function Chats({chats,reload}) {
-  const [selected,setSelected]=useState(null),[text,setText]=useState("");
+  const [selected,setSelected]=useState(null),[text,setText]=useState(""),[refreshing,setRefreshing]=useState(false),[refreshed,setRefreshed]=useState(false),[actionMessage,setActionMessage]=useState(null);
   const messagesRef=useRef(null);
-  const current=useMemo(()=>chats.find(c=>c._id===selected)||chats[0],[chats,selected]);
+  const longPressRef=useRef(null);
+  const current=useMemo(()=>selected?chats.find(c=>c._id===selected)||null:null,[chats,selected]);
 
   useEffect(()=>{
     const messages=messagesRef.current;
@@ -70,6 +71,18 @@ function Chats({chats,reload}) {
   const status=async(value)=>{
     await api(`/chat/admin/${current._id}/status`,{method:"PATCH",body:JSON.stringify({status:value})});
     reload();
+  };
+  const refresh=async()=>{
+    if(refreshing) return;
+    setRefreshing(true);
+    setRefreshed(false);
+    try {
+      await reload();
+      setRefreshed(true);
+      setTimeout(()=>setRefreshed(false),1800);
+    } finally {
+      setRefreshing(false);
+    }
   };
   const send=async(e)=>{
     e.preventDefault();
@@ -89,18 +102,25 @@ function Chats({chats,reload}) {
     await api(`/chat/admin/${current._id}/message/${message._id}`,{method:"DELETE"});
     await reload();
   };
+  const beginLongPress=(message)=>{
+    if(message.sender!=="admin") return;
+    clearTimeout(longPressRef.current);
+    longPressRef.current=setTimeout(()=>setActionMessage(message._id),550);
+  };
+  const cancelLongPress=()=>clearTimeout(longPressRef.current);
+  const closeChatView=()=>{cancelLongPress();setActionMessage(null);setSelected(null)};
 
-  return <section className="chat-desk">
+  return <section className={`chat-desk${current?" chat-open":""}`}>
     <aside>
-      <div className="panel-head"><h2>Conversations</h2><button onClick={reload}>↻</button></div>
-      {chats.map(c=><button key={c._id} className={current?._id===c._id?"selected":""} onClick={()=>setSelected(c._id)}><span>{c.customerName?.[0]||"G"}</span><div><b>{c.customerName}</b><small>{c.messages.at(-1)?.text}</small></div><i className={c.status}>{c.status}</i></button>)}
+      <div className="panel-head chat-list-head"><div><h2>Conversations</h2>{refreshed&&<small className="refresh-success">Updated ✓</small>}</div><button type="button" className="refresh-chats" onClick={refresh} disabled={refreshing} aria-label="Refresh conversations">{refreshing?"Refreshing…":"↻ Refresh"}</button></div>
+      {chats.map(c=><button key={c._id} className={current?._id===c._id?"selected":""} onClick={()=>{setSelected(c._id);setActionMessage(null)}}><span>{c.customerName?.[0]||"G"}</span><div><b>{c.customerName}</b><small>{c.messages.at(-1)?.text}</small></div><i className={c.status}>{c.status}</i></button>)}
       {!chats.length&&<p>No chats yet.</p>}
     </aside>
     <main>{current?<>
-      <header><div><h2>{current.customerName}</h2><p>{current.customerPhone||"No phone shared"} · {current.status}</p></div><div className="chat-status-actions">{current.status==="pending"&&<button className="main-action" style={{background:"var(--orange)",color:"white",borderColor:"var(--orange)"}} onClick={()=>status("accepted")}>Accept request</button>}{["accepted","active"].includes(current.status)&&<span className="accepted-label">✓ Accepted / Active</span>}{current.status==="closed"?<button className="main-action" onClick={()=>status("accepted")}>Accept / Reopen</button>:current.status!=="pending"&&<button onClick={()=>status("closed")}>End chat</button>}</div></header>
-      <div className="admin-messages" ref={messagesRef}>{current.messages.map(m=><p key={m._id} className={m.sender}><small>{m.sender}</small><span>{m.text}</span>{m.mediaUrl&&<a href={m.mediaUrl} target="_blank" rel="noreferrer"><img src={m.mediaUrl} alt={`Payment proof ${m.orderNumber||""}`}/></a>}{m.sender==="admin"&&<span className="message-actions"><button type="button" onClick={()=>editMessage(m)}>Edit</button><button type="button" onClick={()=>deleteMessage(m)}>Delete</button></span>}</p>)}</div>
-      <form className="admin-reply-form" onSubmit={send}><input disabled={current.status==="closed"} value={text} onChange={e=>setText(e.target.value)} placeholder={current.status==="closed"?"This conversation is closed":"Reply to customer"}/><button disabled={current.status==="closed"}>Send</button></form>
-    </>:<div className="no-selection">Select a conversation</div>}</main>
+      <header><div className="selected-chat-info"><h2>{current.customerName}</h2><p>{current.customerPhone||"No phone shared"} · {current.status}</p></div><div className="chat-status-actions">{current.status==="pending"&&<button className="chat-primary-action" onClick={()=>status("accepted")}>Accept request</button>}{["accepted","active"].includes(current.status)&&<span className="accepted-label">✓ Accepted / Active</span>}{current.status==="closed"?<button className="chat-primary-action" onClick={()=>status("accepted")}>Accept / Reopen</button>:current.status!=="pending"&&<button className="chat-secondary-action" onClick={()=>status("closed")}>End chat</button>}<button type="button" className="chat-view-close" onClick={closeChatView} aria-label="Close chat view" title="Close chat view">×</button></div></header>
+      <div className="admin-messages" ref={messagesRef}>{current.messages.map(m=><p key={m._id} className={`${m.sender}${actionMessage===m._id?" actions-visible":""}`} onPointerDown={()=>beginLongPress(m)} onPointerUp={cancelLongPress} onPointerCancel={cancelLongPress} onPointerLeave={cancelLongPress} onContextMenu={e=>{if(m.sender!=="admin")return;e.preventDefault();setActionMessage(m._id)}}><small>{m.sender}</small><span>{m.text}</span>{m.mediaUrl&&<a href={m.mediaUrl} target="_blank" rel="noreferrer"><img src={m.mediaUrl} alt={`Payment proof ${m.orderNumber||""}`}/></a>}{m.sender==="admin"&&actionMessage===m._id&&<span className="message-actions"><button type="button" onClick={()=>editMessage(m)}>Edit</button><button type="button" onClick={()=>deleteMessage(m)}>Delete</button></span>}</p>)}</div>
+      <form className="admin-reply-form" onSubmit={send}><input disabled={current.status==="closed"} value={text} onChange={e=>setText(e.target.value)} placeholder={current.status==="closed"?"Reopen this chat to reply":"Type your reply…"} enterKeyHint="send"/><button disabled={current.status==="closed"}>Send</button></form>
+    </>:<div className="no-selection"><b>Select a conversation</b><small>Press and hold an admin message to edit or delete it.</small></div>}</main>
   </section>;
 }
 
