@@ -9,3 +9,94 @@
 
 .upi-payment-actions{margin:1.5rem 0;padding:1.25rem;border:1px solid #c6dedb;border-radius:14px;background:linear-gradient(145deg,#f4fbfa,#e5f7f4);text-align:left}.upi-payment-actions h3{margin:.25rem 0;font:800 1.7rem Manrope;color:var(--navy)}.upi-payment-actions>p:not(.eyebrow){margin:.3rem 0 1rem;color:#617b86}.upi-payment-actions>button,.upi-payment-actions>div button{min-height:48px;border:1px solid #a9c9c6;border-radius:9px;background:white;color:var(--navy);font-weight:800;cursor:pointer}.upi-payment-actions .upi-primary{width:100%;border-color:var(--orange);background:var(--orange);color:white}.upi-payment-actions>div{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-top:.7rem}.upi-payment-actions>small{display:block;margin-top:1rem;color:#607985;line-height:1.5}.upi-unavailable{margin:1rem 0;padding:1rem;border-radius:10px;background:#fff4e8;color:#8b4a27}.payment-return-note{padding:.8rem;border-radius:8px;background:#e6f5ff!important;color:#0b628a!important;font-weight:700}
 @media(max-width:600px){.upi-payment-actions>div{grid-template-columns:1fr}.upi-payment-actions{padding:1rem}}
+
+.payment-page,
+.payment-summary,
+.payment-card,
+.upi-payment-actions,
+.proof-upload {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.payment-card,
+.payment-card * {
+  overflow-wrap: anywhere;
+}
+
+.upi-payment-actions > button,
+.upi-payment-actions > div,
+.upi-payment-actions > div button {
+  width: 100%;
+  max-width: 100%;
+  white-space: normal;
+}
+
+.proof-upload input[type="file"] {
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  color: transparent;
+}
+
+.proof-upload input[type="file"]::file-selector-button {
+  margin-right: .7rem;
+  padding: .7rem .9rem;
+  border: 0;
+  border-radius: 8px;
+  background: var(--navy);
+  color: white;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+@media(max-width:600px) {
+  .payment-page {
+    width: 100%;
+    padding: 1rem;
+    gap: 1rem;
+    overflow-x: hidden;
+  }
+
+  .payment-summary,
+  .payment-card {
+    width: 100%;
+    padding: 1rem;
+  }
+
+  .payment-card h2,
+  .upi-payment-actions h3 {
+    font-size: 1.55rem;
+  }
+
+  .upi-payment-actions {
+    width: 100%;
+    margin: 1rem 0;
+    padding: .9rem;
+  }
+
+  .upi-payment-actions > button,
+  .upi-payment-actions > div button {
+    min-height: 50px;
+    padding: .75rem;
+    font-size: 1rem;
+    text-align: center;
+  }
+
+  .proof-upload {
+    width: 100%;
+    margin: 1rem 0;
+    padding: .9rem;
+  }
+
+  .proof-upload input[type="file"] {
+    display: block;
+    padding: .45rem;
+  }
+
+  .payment-card > .secondary {
+    width: 100%;
+    min-width: 0;
+    white-space: normal;
+  }
+}
