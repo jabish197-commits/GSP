@@ -9,6 +9,10 @@
   min-width: 0;
 }
 
+.detail-back-icon {
+  display: none;
+}
+
 .fish-media-stage {
   width: 100%;
   height: clamp(420px, 65vh, 700px);
@@ -83,6 +87,35 @@
 }
 
 @media (max-width: 600px) {
+  .detail {
+    position: relative;
+    padding-top: 1rem;
+  }
+
+  .detail-back-icon {
+    position: fixed;
+    top: calc(82px + env(safe-area-inset-top));
+    left: 1rem;
+    z-index: 19;
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    padding: 0;
+    border: 1px solid rgba(255,255,255,.7);
+    border-radius: 50%;
+    background: rgba(6,46,80,.9);
+    color: #fff;
+    box-shadow: 0 8px 24px rgba(6,46,80,.28);
+    font-size: 1.45rem;
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+  }
+
+  .detail-back-text {
+    display: none;
+  }
+
   .fish-media-stage {
     height: min(55vh, 430px);
     min-height: 300px;

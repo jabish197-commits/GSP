@@ -45,3 +45,14 @@
 .messages .message-actions button:last-child {
   color: #a53a32;
 }
+
+.messages p.customer {
+  -webkit-touch-callout: none;
+  user-select: none;
+  touch-action: pan-y;
+}
+
+.messages p.customer.actions-visible {
+  outline: 2px solid var(--orange);
+  outline-offset: 2px;
+}
