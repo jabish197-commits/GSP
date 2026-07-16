@@ -5,6 +5,7 @@ import Chat from "../models/Chat.js";
 import { requireAdmin } from "../middleware/adminAuth.js";
 import { requireCustomer } from "../middleware/customerAuth.js";
 import asyncHandler from "../utils/asyncHandler.js";
+import { sendAdminPush } from "../services/pushNotificationService.js";
 
 const router = Router();
 
@@ -26,6 +27,12 @@ router.post("/", requireCustomer, asyncHandler(async (request, response) => {
   });
   const customer = { ...request.body.customer, name: request.customer.name, email: request.customer.email, phone: request.customer.phone };
   const order = await Order.create({ customerAccount: request.customer._id, customer, notes: request.body.notes, items, total: items.reduce((sum, item) => sum + item.price * item.quantity, 0) });
+  sendAdminPush({
+    title: "New guppy enquiry",
+    body: `${customer.name} sent ${order.orderNumber} for ₹${order.total}.`,
+    tag: `order-${order.id}`,
+    url: "/",
+  }).catch(() => {});
   response.status(201).json({ order: { orderNumber: order.orderNumber, total: order.total, status: order.status } });
 }));
 
@@ -44,6 +51,12 @@ router.post("/:orderNumber/payment-proof", requireCustomer, asyncHandler(async (
   chat.messages.push({ sender: "customer", text: `Payment screenshot for ${order.orderNumber}`, mediaUrl: media.url, mediaType: "image", orderNumber: order.orderNumber });
   chat.status = "pending";
   await chat.save();
+  sendAdminPush({
+    title: "Payment screenshot received",
+    body: `${request.customer.name} submitted payment proof for ${order.orderNumber}.`,
+    tag: `payment-${order.id}`,
+    url: "/",
+  }).catch(() => {});
   response.json({ order, chat });
 }));
 

@@ -5,6 +5,7 @@ import { requireAdmin } from "../middleware/adminAuth.js";
 import { requireCustomer } from "../middleware/customerAuth.js";
 import answerCustomer from "../services/aiChatService.js";
 import asyncHandler from "../utils/asyncHandler.js";
+import { sendAdminPush } from "../services/pushNotificationService.js";
 
 const router = Router();
 
@@ -49,6 +50,12 @@ router.post("/session/:sessionId/message", requireCustomer, asyncHandler(async (
   chat.messages.push({ sender: "customer", text });
   if (chat.status === "ai") chat.messages.push({ sender: "ai", text: await answerCustomer(text) });
   await chat.save();
+  sendAdminPush({
+    title: `Message from ${request.customer.name}`,
+    body: text.length > 100 ? `${text.slice(0, 97)}…` : text,
+    tag: `chat-${chat.id}`,
+    url: "/",
+  }).catch(() => {});
   response.json({ chat });
 }));
 
@@ -84,6 +91,12 @@ router.post("/session/:sessionId/request-admin", requireCustomer, asyncHandler(a
   chat.status = "pending";
   chat.messages.push({ sender: "system", text: "Your request was sent to the breeder." });
   await chat.save();
+  sendAdminPush({
+    title: "New breeder request",
+    body: `${request.customer.name} requested to chat with you.`,
+    tag: `chat-request-${chat.id}`,
+    url: "/",
+  }).catch(() => {});
   response.json({ chat });
 }));
 

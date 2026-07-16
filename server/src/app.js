@@ -13,6 +13,7 @@ import settingsRoutes from "./routes/settingsRoutes.js";
 import careGuideRoutes from "./routes/careGuideRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
 import customerAuthRoutes from "./routes/customerAuthRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js";
 import { errorHandler, notFound } from "./middleware/errorHandler.js";
 
 dotenv.config();
@@ -65,6 +66,7 @@ app.use("/api/settings", settingsRoutes);
 app.use("/api/media", mediaRoutes);
 app.use("/api/care-guides", careGuideRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

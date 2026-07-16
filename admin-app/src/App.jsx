@@ -8,6 +8,34 @@ import "./mobile-fixes.css";
 const emptyFish = { name:"", strain:"", description:"", price:"", quantity:1, sex:"pair", age:"", status:"available", featured:false, media:[] };
 const money = (value) => new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:0}).format(value||0);
 
+function urlBase64ToUint8Array(value) {
+  const padding="=".repeat((4-value.length%4)%4);
+  const base64=(value+padding).replace(/-/g,"+").replace(/_/g,"/");
+  return Uint8Array.from(atob(base64),character=>character.charCodeAt(0));
+}
+
+function NotificationControl() {
+  const initial=typeof Notification!=="undefined"&&Notification.permission==="granted"?"enabled":"idle";
+  const [state,setState]=useState(initial),[message,setMessage]=useState("");
+  const enable=async()=>{
+    setState("loading");setMessage("");
+    try {
+      if(!("serviceWorker" in navigator)||!("PushManager" in window)) throw new Error("Install this admin website on your Home Screen to enable notifications.");
+      const permission=await Notification.requestPermission();
+      if(permission!=="granted") throw new Error("Notification permission was not allowed.");
+      const registration=await navigator.serviceWorker.register("/sw.js");
+      await navigator.serviceWorker.ready;
+      const {publicKey}=await api("/notifications/public-key");
+      const existing=await registration.pushManager.getSubscription();
+      const subscription=existing||await registration.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlBase64ToUint8Array(publicKey)});
+      await api("/notifications/subscribe",{method:"POST",body:JSON.stringify({subscription:subscription.toJSON()})});
+      await api("/notifications/test",{method:"POST",body:"{}"});
+      setState("enabled");setMessage("Enabled ✓");
+    } catch(error){setState("idle");setMessage(error.message)}
+  };
+  return <div className="notification-control"><button type="button" onClick={enable} disabled={state==="loading"}>{state==="enabled"?"🔔 Notifications on":state==="loading"?"Enabling…":"🔔 Enable mobile notifications"}</button>{message&&<small>{message}</small>}</div>;
+}
+
 function MediaAttachmentList({media=[],onRemove}) {
   if (!media.length) return null;
   return <div className="wide media-attachment-list">
@@ -162,4 +190,4 @@ function Settings({settings,setSettings}) {
 <label>Upload QR code<input type="file" accept="image/*" onChange={e=>uploadQr(e.target.files[0])}/><span>{uploadingQr?"Uploading QR…":settings.paymentQr?.url?"QR uploaded":"Choose QR image"}</span></label></div>{settings.paymentQr?.url&&<img src={settings.paymentQr.url} alt="Payment QR preview" style={{width:220,maxWidth:"100%",margin:"1rem 0",borderRadius:10,border:"1px solid #ccd"}}/>}<label>Payment instructions<textarea value={settings.paymentInstructions||""} onChange={e=>setSettings({...settings,paymentInstructions:e.target.value})}/></label></div><button className="main-action" disabled={uploadingQr}>Save public information and payment QR</button>{saved&&<div className="save-success" role="status" aria-live="polite"><span>✓</span><div><b>Saved successfully</b><small>Your public website information has been updated.</small></div></div>}</form></section>;
 }
 
-export default function App(){const[admin,setAdmin]=useState(null),[checking,setChecking]=useState(true);useEffect(()=>{api("/auth/me").then(d=>setAdmin(d.admin)).catch(()=>{}).finally(()=>setChecking(false))},[]);if(checking)return <div className="loading"><img src="/logo.png" alt=""/><p>Opening admin panel…</p></div>;return admin?<Shell admin={admin} onLogout={()=>setAdmin(null)}/>:<Login onLogin={setAdmin}/>}
+export default function App(){const[admin,setAdmin]=useState(null),[checking,setChecking]=useState(true);useEffect(()=>{api("/auth/me").then(d=>setAdmin(d.admin)).catch(()=>{}).finally(()=>setChecking(false))},[]);if(checking)return <div className="loading"><img src="/logo.png" alt=""/><p>Opening admin panel…</p></div>;return admin?<><NotificationControl/><Shell admin={admin} onLogout={()=>setAdmin(null)}/></>:<Login onLogin={setAdmin}/>}
