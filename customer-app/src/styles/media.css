@@ -93,10 +93,10 @@
   }
 
   .detail-back-icon {
-    position: fixed;
-    top: calc(82px + env(safe-area-inset-top));
-    left: 1rem;
-    z-index: 19;
+    position: absolute;
+    top: 1.75rem;
+    left: 1.75rem;
+    z-index: 5;
     display: grid;
     place-items: center;
     width: 46px;

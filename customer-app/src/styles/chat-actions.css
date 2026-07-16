@@ -56,3 +56,29 @@
   outline: 2px solid var(--orange);
   outline-offset: 2px;
 }
+
+@media (max-width: 600px) {
+  .chat {
+    right: max(.75rem, env(safe-area-inset-right));
+    bottom: calc(.75rem + env(safe-area-inset-bottom));
+  }
+
+  .chat-toggle {
+    min-width: 54px;
+    height: 50px;
+    padding: 0 .8rem;
+    box-shadow: 0 8px 22px rgba(29,49,77,.28);
+  }
+
+  .chat-panel {
+    right: 0;
+    bottom: 60px;
+    width: calc(100vw - 1.5rem);
+    height: min(620px, calc(100dvh - 150px));
+  }
+
+  .chat-input input {
+    min-width: 0;
+    font-size: 16px;
+  }
+}
