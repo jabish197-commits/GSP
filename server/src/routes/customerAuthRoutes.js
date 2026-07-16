@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import Customer from "../models/Customer.js";
 import { requireCustomer } from "../middleware/customerAuth.js";
 import asyncHandler from "../utils/asyncHandler.js";
+import { clearSessionCookieOptions, sessionCookieOptions } from "../utils/cookieOptions.js";
 
 const router = Router();
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -17,12 +18,7 @@ function setSession(response, customer) {
     process.env.JWT_ACCESS_SECRET,
     { expiresIn: "7d" },
   );
-  response.cookie("sj_customer_token", token, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-  });
+  response.cookie("sj_customer_token", token, sessionCookieOptions(7 * 24 * 60 * 60 * 1000));
 }
 
 router.post("/register", asyncHandler(async (request, response) => {
@@ -57,7 +53,7 @@ router.get("/me", requireCustomer, (request, response) => {
 });
 
 router.post("/logout", (_request, response) => {
-  response.clearCookie("sj_customer_token").json({ message: "Logged out." });
+  response.clearCookie("sj_customer_token", clearSessionCookieOptions()).json({ message: "Logged out." });
 });
 
 export default router;
