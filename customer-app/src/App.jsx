@@ -11,6 +11,15 @@ const demoFish = [
 
 const money = (value) => new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(value);
 
+function videoPoster(media) {
+  if (!media?.url) return "";
+  if (media.poster) return media.poster;
+  if (!media.url.includes("res.cloudinary.com") || !media.url.includes("/video/upload/")) return "";
+  return media.url
+    .replace("/video/upload/", "/video/upload/so_0,f_jpg,q_auto/")
+    .replace(/\.[a-z0-9]+(?:\?.*)?$/i, ".jpg");
+}
+
 function Header({ cartCount, customer, logout, settings }) {
   const [open, setOpen] = useState(false);
   const location = useLocation();
@@ -27,7 +36,7 @@ function Footer({ settings }) {
 function FishCard({ fish, add }) {
   const preview = fish.media?.find((item) => item.url);
   const media = preview?.type === "video"
-    ? <video className="fish-card-video" src={preview.url} muted autoPlay loop playsInline preload="metadata" aria-label={`${fish.name} preview`}/>
+    ? <video className="fish-card-video" src={preview.url} poster={videoPoster(preview)} muted autoPlay loop playsInline preload="metadata" aria-label={`${fish.name} preview`}/>
     : preview?.url
       ? <img src={preview.url} alt={preview.alt || fish.name}/>
       : <div className="fish-placeholder">SJ<span>GUPPY</span></div>;
