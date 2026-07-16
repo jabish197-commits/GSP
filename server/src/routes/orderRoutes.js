@@ -54,14 +54,21 @@ router.get("/mine", requireCustomer, asyncHandler(async (request, response) => {
 
 router.get("/", requireAdmin, asyncHandler(async (_request, response) => response.json({ orders: await Order.find().sort({ createdAt: -1 }) })));
 router.patch("/:id/status", requireAdmin, asyncHandler(async (request, response) => {
-  const order = await Order.findByIdAndUpdate(request.params.id, { status: request.body.status }, { returnDocument: "after", runValidators: true });
+  const status = request.body.status;
+  const update = { status };
+  if (status === "confirmed") update.acceptedAt = new Date();
+  const order = await Order.findByIdAndUpdate(request.params.id, update, { returnDocument: "after", runValidators: true });
   if (!order) return response.status(404).json({ message: "Order not found." });
   response.json({ order });
 }));
 router.patch("/:id/payment-status", requireAdmin, asyncHandler(async (request, response) => {
   const allowed = ["pending", "submitted", "verified", "rejected"];
   if (!allowed.includes(request.body.paymentStatus)) return response.status(400).json({ message: "Invalid payment status." });
-  const order = await Order.findByIdAndUpdate(request.params.id, { paymentStatus: request.body.paymentStatus }, { returnDocument: "after", runValidators: true });
+  const paymentStatus = request.body.paymentStatus;
+  const update = { paymentStatus, "paymentTracking.adminNote": String(request.body.adminNote || "").trim().slice(0, 500) };
+  if (paymentStatus === "verified") update["paymentTracking.verifiedAt"] = new Date();
+  if (paymentStatus === "rejected") update["paymentTracking.rejectedAt"] = new Date();
+  const order = await Order.findByIdAndUpdate(request.params.id, update, { returnDocument: "after", runValidators: true });
   if (!order) return response.status(404).json({ message: "Order not found." });
   response.json({ order });
 }));

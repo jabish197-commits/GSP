@@ -72,6 +72,17 @@ button {
   font-weight: 800;
 }
 
+.order-accepted {
+  display: inline-flex;
+  align-items: center;
+  padding: .55rem .75rem;
+  border-radius: 999px;
+  background: #ddf5ea;
+  color: #087353;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
 .chat-desk header .chat-view-close {
   display: grid;
   place-items: center;

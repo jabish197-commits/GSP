@@ -21,8 +21,14 @@ const orderSchema = new mongoose.Schema({
   total: { type: Number, default: 0 },
   paymentStatus: { type: String, enum: ["pending", "submitted", "verified", "rejected"], default: "pending", index: true },
   paymentProof: { url: String, publicId: String, submittedAt: Date },
+  paymentTracking: {
+    verifiedAt: Date,
+    rejectedAt: Date,
+    adminNote: { type: String, maxlength: 500, default: "" },
+  },
   notes: { type: String, maxlength: 1000 },
   status: { type: String, enum: ["new", "confirmed", "preparing", "shipped", "completed", "cancelled"], default: "new", index: true },
+  acceptedAt: Date,
 }, { timestamps: true });
 
 orderSchema.pre("validate", function setNumber() {
