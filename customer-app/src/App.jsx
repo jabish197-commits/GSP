@@ -21,10 +21,16 @@ function videoPoster(media) {
 }
 
 function ScrollToTop() {
-  const { pathname } = useLocation();
+  const { pathname, hash } = useLocation();
   useEffect(() => {
+    if (hash) {
+      const timer = window.setTimeout(() => {
+        document.getElementById(hash.slice(1))?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 0);
+      return () => window.clearTimeout(timer);
+    }
     window.scrollTo(0, 0);
-  }, [pathname]);
+  }, [pathname, hash]);
   return null;
 }
 
@@ -34,7 +40,7 @@ function Header({ cartCount, customer, logout, settings }) {
   useEffect(() => setOpen(false), [location.pathname, location.hash]);
   const closeMenu = () => setOpen(false);
   const handleLogout = () => { closeMenu(); logout(); };
-  return <header className="site-header"><Link className="brand" to="/" onClick={closeMenu}><img src="/logo.png" alt="SJ Guppy Paradise"/><span><b>SJ GUPPY</b><small>PARADISE</small></span></Link><button className="menu" onClick={() => setOpen(!open)} aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open} aria-controls="customer-navigation">{open ? "×" : "☰"}</button><nav id="customer-navigation" className={open ? "open" : ""}><Link to="/" onClick={closeMenu}>Home</Link><Link to="/collection" onClick={closeMenu}>Guppies</Link><a href="/#care" onClick={closeMenu}>Care guide</a><a href="/#contact" onClick={closeMenu}>Contact</a>{settings.instagramUrl&&<a className="instagram-nav" href={settings.instagramUrl} target="_blank" rel="noreferrer" onClick={closeMenu}>Instagram</a>}<Link className="nav-cart" to="/enquiry" onClick={closeMenu}>Enquiry <span>{cartCount}</span></Link>{customer?<><Link className="account-link" to="/account" onClick={closeMenu}>Hi, {customer.name.split(" ")[0]}</Link><button className="nav-logout" onClick={handleLogout}>Logout</button></>:<><Link to="/login" onClick={closeMenu}>Login</Link><Link className="nav-register" to="/register" onClick={closeMenu}>Register</Link></>}</nav></header>;
+  return <header className="site-header"><Link className="brand" to="/" onClick={closeMenu}><img src="/logo.png" alt="SJ Guppy Paradise"/><span><b>SJ GUPPY</b><small>PARADISE</small></span></Link><button className="menu" onClick={() => setOpen(!open)} aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open} aria-controls="customer-navigation">{open ? "×" : "☰"}</button><nav id="customer-navigation" className={open ? "open" : ""}><Link to="/" onClick={closeMenu}>Home</Link><Link to="/collection" onClick={closeMenu}>Guppies</Link><Link to="/#care" onClick={closeMenu}>Care guide</Link><Link to="/#contact" onClick={closeMenu}>Contact</Link>{settings.instagramUrl&&<a className="instagram-nav" href={settings.instagramUrl} target="_blank" rel="noreferrer" onClick={closeMenu}>Instagram</a>}<Link className="nav-cart" to="/enquiry" onClick={closeMenu}>Enquiry <span>{cartCount}</span></Link>{customer?<><Link className="account-link" to="/account" onClick={closeMenu}>Hi, {customer.name.split(" ")[0]}</Link><button className="nav-logout" onClick={handleLogout}>Logout</button></>:<><Link to="/login" onClick={closeMenu}>Login</Link><Link className="nav-register" to="/register" onClick={closeMenu}>Register</Link></>}</nav></header>;
 }
 
 function Footer({ settings }) {
@@ -153,10 +159,18 @@ function ChatWidget({ customer }) {
 export default function App() {
   const [fish, setFish] = useState(demoFish), [cart, setCart] = useState([]), [settings, setSettings] = useState({});
   const [customer, setCustomer] = useState(null), [authLoading, setAuthLoading] = useState(true);
+  const [enquiryNotice,setEnquiryNotice] = useState(null);
+  const noticeTimer = useRef(null);
   useEffect(() => { api("/fish").then((data) => setFish(data.fish)).catch(() => setFish(demoFish)); api("/customer-auth/me").then(data=>setCustomer(data.customer)).catch(()=>setCustomer(null)).finally(()=>setAuthLoading(false)); }, []);
   useEffect(() => { const loadSettings=()=>api("/settings").then(data=>setSettings(data.settings)).catch(()=>{}); loadSettings(); window.addEventListener("focus",loadSettings); const interval=setInterval(loadSettings,30000); return()=>{window.removeEventListener("focus",loadSettings);clearInterval(interval)}; }, []);
-  const add = (item) => setCart((items) => items.some((entry) => entry._id === item._id) ? items : [...items, { ...item, availableQuantity: item.quantity, orderQuantity: 1, selectionType: item.sex === "pair" ? "pair" : "custom", fishPerPack: item.sex === "pair" ? 2 : 1 }]);
+  const add = (item) => {
+    const alreadyAdded=cart.some(entry=>entry._id===item._id);
+    if(!alreadyAdded) setCart(items=>[...items,{...item,availableQuantity:item.quantity,orderQuantity:1,selectionType:item.sex==="pair"?"pair":"custom",fishPerPack:item.sex==="pair"?2:1}]);
+    setEnquiryNotice({name:item.name,alreadyAdded});
+    window.clearTimeout(noticeTimer.current);
+    noticeTimer.current=window.setTimeout(()=>setEnquiryNotice(null),3500);
+  };
   const updateItem = (id, changes) => setCart(items=>items.map(item=>item._id===id?{...item,...changes}:item));
   const logout = async () => { await api("/customer-auth/logout", { method: "POST" }).catch(()=>{}); setCustomer(null); };
-  return <><ScrollToTop/><Header cartCount={cart.length} customer={customer} logout={logout} settings={settings}/><Routes><Route path="/" element={<Home fish={fish} add={add} settings={settings}/>}/><Route path="/collection" element={<Collection fish={fish} add={add}/>}/><Route path="/fish/:slug" element={<FishDetails fish={fish} add={add}/>}/><Route path="/login" element={customer?<Navigate to="/account" replace/>:<CustomerAuth mode="login" onAuthenticated={setCustomer}/>}/><Route path="/register" element={customer?<Navigate to="/account" replace/>:<CustomerAuth mode="register" onAuthenticated={setCustomer}/>}/><Route path="/account" element={<RequireCustomer customer={customer} loading={authLoading}><CustomerAccount customer={customer} logout={logout}/></RequireCustomer>}/><Route path="/enquiry" element={<RequireCustomer customer={customer} loading={authLoading}><Enquiry customer={customer} settings={settings} cart={cart} updateItem={updateItem} remove={(id)=>setCart(cart.filter((item)=>item._id!==id))} clear={()=>setCart([])}/></RequireCustomer>}/><Route path="*" element={<main className="page empty"><h1>Page not found</h1><Link to="/">Go home</Link></main>}/></Routes><Footer settings={settings}/><ChatWidget customer={customer}/></>;
+  return <><ScrollToTop/><Header cartCount={cart.length} customer={customer} logout={logout} settings={settings}/>{enquiryNotice&&<div className="enquiry-toast" role="status" aria-live="polite"><span>✓</span><div><b>{enquiryNotice.alreadyAdded?"Already in enquiry":"Added to enquiry"}</b><small>{enquiryNotice.name}</small></div><Link to="/enquiry" onClick={()=>setEnquiryNotice(null)}>View</Link><button type="button" onClick={()=>setEnquiryNotice(null)} aria-label="Dismiss notification">×</button></div>}<Routes><Route path="/" element={<Home fish={fish} add={add} settings={settings}/>}/><Route path="/collection" element={<Collection fish={fish} add={add}/>}/><Route path="/fish/:slug" element={<FishDetails fish={fish} add={add}/>}/><Route path="/login" element={customer?<Navigate to="/account" replace/>:<CustomerAuth mode="login" onAuthenticated={setCustomer}/>}/><Route path="/register" element={customer?<Navigate to="/account" replace/>:<CustomerAuth mode="register" onAuthenticated={setCustomer}/>}/><Route path="/account" element={<RequireCustomer customer={customer} loading={authLoading}><CustomerAccount customer={customer} logout={logout}/></RequireCustomer>}/><Route path="/enquiry" element={<RequireCustomer customer={customer} loading={authLoading}><Enquiry customer={customer} settings={settings} cart={cart} updateItem={updateItem} remove={(id)=>setCart(cart.filter((item)=>item._id!==id))} clear={()=>setCart([])}/></RequireCustomer>}/><Route path="*" element={<main className="page empty"><h1>Page not found</h1><Link to="/">Go home</Link></main>}/></Routes><Footer settings={settings}/><ChatWidget customer={customer}/></>;
 }
