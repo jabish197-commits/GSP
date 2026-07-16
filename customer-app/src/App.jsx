@@ -20,6 +20,14 @@ function videoPoster(media) {
     .replace(/\.[a-z0-9]+(?:\?.*)?$/i, ".jpg");
 }
 
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
+
 function Header({ cartCount, customer, logout, settings }) {
   const [open, setOpen] = useState(false);
   const location = useLocation();
@@ -150,5 +158,5 @@ export default function App() {
   const add = (item) => setCart((items) => items.some((entry) => entry._id === item._id) ? items : [...items, { ...item, availableQuantity: item.quantity, orderQuantity: 1, selectionType: item.sex === "pair" ? "pair" : "custom", fishPerPack: item.sex === "pair" ? 2 : 1 }]);
   const updateItem = (id, changes) => setCart(items=>items.map(item=>item._id===id?{...item,...changes}:item));
   const logout = async () => { await api("/customer-auth/logout", { method: "POST" }).catch(()=>{}); setCustomer(null); };
-  return <><Header cartCount={cart.length} customer={customer} logout={logout} settings={settings}/><Routes><Route path="/" element={<Home fish={fish} add={add} settings={settings}/>}/><Route path="/collection" element={<Collection fish={fish} add={add}/>}/><Route path="/fish/:slug" element={<FishDetails fish={fish} add={add}/>}/><Route path="/login" element={customer?<Navigate to="/account" replace/>:<CustomerAuth mode="login" onAuthenticated={setCustomer}/>}/><Route path="/register" element={customer?<Navigate to="/account" replace/>:<CustomerAuth mode="register" onAuthenticated={setCustomer}/>}/><Route path="/account" element={<RequireCustomer customer={customer} loading={authLoading}><CustomerAccount customer={customer} logout={logout}/></RequireCustomer>}/><Route path="/enquiry" element={<RequireCustomer customer={customer} loading={authLoading}><Enquiry customer={customer} settings={settings} cart={cart} updateItem={updateItem} remove={(id)=>setCart(cart.filter((item)=>item._id!==id))} clear={()=>setCart([])}/></RequireCustomer>}/><Route path="*" element={<main className="page empty"><h1>Page not found</h1><Link to="/">Go home</Link></main>}/></Routes><Footer settings={settings}/><ChatWidget customer={customer}/></>;
+  return <><ScrollToTop/><Header cartCount={cart.length} customer={customer} logout={logout} settings={settings}/><Routes><Route path="/" element={<Home fish={fish} add={add} settings={settings}/>}/><Route path="/collection" element={<Collection fish={fish} add={add}/>}/><Route path="/fish/:slug" element={<FishDetails fish={fish} add={add}/>}/><Route path="/login" element={customer?<Navigate to="/account" replace/>:<CustomerAuth mode="login" onAuthenticated={setCustomer}/>}/><Route path="/register" element={customer?<Navigate to="/account" replace/>:<CustomerAuth mode="register" onAuthenticated={setCustomer}/>}/><Route path="/account" element={<RequireCustomer customer={customer} loading={authLoading}><CustomerAccount customer={customer} logout={logout}/></RequireCustomer>}/><Route path="/enquiry" element={<RequireCustomer customer={customer} loading={authLoading}><Enquiry customer={customer} settings={settings} cart={cart} updateItem={updateItem} remove={(id)=>setCart(cart.filter((item)=>item._id!==id))} clear={()=>setCart([])}/></RequireCustomer>}/><Route path="*" element={<main className="page empty"><h1>Page not found</h1><Link to="/">Go home</Link></main>}/></Routes><Footer settings={settings}/><ChatWidget customer={customer}/></>;
 }
