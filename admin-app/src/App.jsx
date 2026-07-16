@@ -61,6 +61,7 @@ function Chats({chats,reload}) {
   const [selected,setSelected]=useState(null),[text,setText]=useState(""),[refreshing,setRefreshing]=useState(false),[refreshed,setRefreshed]=useState(false),[actionMessage,setActionMessage]=useState(null);
   const messagesRef=useRef(null);
   const longPressRef=useRef(null);
+  const ignoreNextTapRef=useRef(false);
   const current=useMemo(()=>selected?chats.find(c=>c._id===selected)||null:null,[chats,selected]);
 
   useEffect(()=>{
@@ -105,9 +106,19 @@ function Chats({chats,reload}) {
   const beginLongPress=(message)=>{
     if(message.sender!=="admin") return;
     clearTimeout(longPressRef.current);
-    longPressRef.current=setTimeout(()=>setActionMessage(message._id),550);
+    longPressRef.current=setTimeout(()=>{
+      ignoreNextTapRef.current=true;
+      setActionMessage(message._id);
+    },550);
   };
   const cancelLongPress=()=>clearTimeout(longPressRef.current);
+  const dismissMessageActions=()=>{
+    if(ignoreNextTapRef.current){
+      ignoreNextTapRef.current=false;
+      return;
+    }
+    setActionMessage(null);
+  };
   const closeChatView=()=>{cancelLongPress();setActionMessage(null);setSelected(null)};
 
   return <section className={`chat-desk${current?" chat-open":""}`}>
@@ -118,7 +129,7 @@ function Chats({chats,reload}) {
     </aside>
     <main>{current?<>
       <header><div className="selected-chat-info"><h2>{current.customerName}</h2><p>{current.customerPhone||"No phone shared"} · {current.status}</p></div><div className="chat-status-actions">{current.status==="pending"&&<button className="chat-primary-action" onClick={()=>status("accepted")}>Accept request</button>}{["accepted","active"].includes(current.status)&&<span className="accepted-label">✓ Accepted / Active</span>}{current.status==="closed"?<button className="chat-primary-action" onClick={()=>status("accepted")}>Accept / Reopen</button>:current.status!=="pending"&&<button className="chat-secondary-action" onClick={()=>status("closed")}>End chat</button>}<button type="button" className="chat-view-close" onClick={closeChatView} aria-label="Close chat view" title="Close chat view">×</button></div></header>
-      <div className="admin-messages" ref={messagesRef}>{current.messages.map(m=><p key={m._id} className={`${m.sender}${actionMessage===m._id?" actions-visible":""}`} onPointerDown={()=>beginLongPress(m)} onPointerUp={cancelLongPress} onPointerCancel={cancelLongPress} onPointerLeave={cancelLongPress} onContextMenu={e=>{if(m.sender!=="admin")return;e.preventDefault();setActionMessage(m._id)}}><small>{m.sender}</small><span>{m.text}</span>{m.mediaUrl&&<a href={m.mediaUrl} target="_blank" rel="noreferrer"><img src={m.mediaUrl} alt={`Payment proof ${m.orderNumber||""}`}/></a>}{m.sender==="admin"&&actionMessage===m._id&&<span className="message-actions"><button type="button" onClick={()=>editMessage(m)}>Edit</button><button type="button" onClick={()=>deleteMessage(m)}>Delete</button></span>}</p>)}</div>
+      <div className="admin-messages" ref={messagesRef} onClick={dismissMessageActions}>{current.messages.map(m=><p key={m._id} className={`${m.sender}${actionMessage===m._id?" actions-visible":""}`} onPointerDown={()=>beginLongPress(m)} onPointerUp={cancelLongPress} onPointerCancel={cancelLongPress} onPointerLeave={cancelLongPress} onContextMenu={e=>{if(m.sender!=="admin")return;e.preventDefault();ignoreNextTapRef.current=false;setActionMessage(m._id)}}><small>{m.sender}</small><span>{m.text}</span>{m.mediaUrl&&<a href={m.mediaUrl} target="_blank" rel="noreferrer"><img src={m.mediaUrl} alt={`Payment proof ${m.orderNumber||""}`}/></a>}{m.sender==="admin"&&actionMessage===m._id&&<span className="message-actions" onClick={e=>e.stopPropagation()}><button type="button" onClick={()=>editMessage(m)}>Edit</button><button type="button" onClick={()=>deleteMessage(m)}>Delete</button></span>}</p>)}</div>
       <form className="admin-reply-form" onSubmit={send}><input disabled={current.status==="closed"} value={text} onChange={e=>setText(e.target.value)} placeholder={current.status==="closed"?"Reopen this chat to reply":"Type your reply…"} enterKeyHint="send"/><button disabled={current.status==="closed"}>Send</button></form>
     </>:<div className="no-selection"><b>Select a conversation</b><small>Press and hold an admin message to edit or delete it.</small></div>}</main>
   </section>;
