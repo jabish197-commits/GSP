@@ -23,6 +23,15 @@ const settingsSchema = new mongoose.Schema({
     publicId: String,
   },
   paymentName: { type: String, default: "SJ Guppy Paradise" },
+  upiId: {
+    type: String,
+    trim: true,
+    default: "",
+    validate: {
+      validator: (value) => !value || /^[A-Za-z0-9._-]{2,}@[A-Za-z0-9.-]{2,}$/.test(value),
+      message: "Enter a valid UPI ID, for example name@bank.",
+    },
+  },
   paymentInstructions: { type: String, default: "Scan with GPay or PhonePe. After payment, upload the screenshot for confirmation." },
   careTips: [{ title: String, text: String }],
 }, { timestamps: true });
