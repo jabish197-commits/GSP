@@ -6,6 +6,7 @@ import { requireCustomer } from "../middleware/customerAuth.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { clearSessionCookieOptions, sessionCookieOptions } from "../utils/cookieOptions.js";
 import { deleteMedia, uploadBuffer } from "../services/mediaService.js";
+import { sendRegistrationWelcome } from "../services/whatsappService.js";
 import {
   customerAuthRedirect,
   findOrCreateOAuthCustomer,
@@ -95,14 +96,42 @@ router.post("/register", asyncHandler(async (request, response) => {
   const email = String(request.body.email || "").toLowerCase().trim();
   const phone = String(request.body.phone || "").trim();
   const password = String(request.body.password || "");
+  const whatsappOptIn = request.body.whatsappOptIn === true;
   if (name.length < 2) return response.status(400).json({ message: "Enter your full name." });
   if (!emailPattern.test(email)) return response.status(400).json({ message: "Enter a valid email address." });
   if (phone.length < 7) return response.status(400).json({ message: "Enter a valid phone or WhatsApp number." });
   if (password.length < 8) return response.status(400).json({ message: "Password must contain at least 8 characters." });
   if (await Customer.exists({ email })) return response.status(409).json({ message: "An account already exists for this email." });
-  const customer = await Customer.create({ name, email, phone, password });
+  const customer = await Customer.create({
+    name,
+    email,
+    phone,
+    password,
+    whatsappOptIn,
+    whatsappOptInAt: whatsappOptIn ? new Date() : undefined,
+  });
   setSession(response, customer);
-  response.status(201).json({ customer: publicCustomer(customer) });
+  let whatsappWelcomeSent = false;
+  if (whatsappOptIn) {
+    try {
+      const delivery = await sendRegistrationWelcome({ name, phone });
+      whatsappWelcomeSent = delivery.sent;
+      if (delivery.sent) {
+        customer.whatsappWelcomeSentAt = new Date();
+        customer.whatsappWelcomeMessageId = delivery.messageId;
+        await customer.save();
+      }
+    } catch (error) {
+      console.warn("WhatsApp registration welcome was not sent:", error.message);
+    }
+  }
+  response.status(201).json({
+    customer: publicCustomer(customer),
+    message: whatsappWelcomeSent
+      ? "Registration successful. A welcome message was sent to your WhatsApp."
+      : "Registration successful.",
+    whatsappWelcomeSent,
+  });
 }));
 
 router.post("/login", asyncHandler(async (request, response) => {

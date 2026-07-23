@@ -57,6 +57,8 @@ Run `npm run check`. This creates production builds for both websites and checks
 
 Google and Facebook customer login setup is documented in `SOCIAL_LOGIN_SETUP.md`. OAuth client secrets must be stored only in the API deployment environment.
 
+Automatic registration welcomes use the WhatsApp Business Cloud API and an approved template. Configure only the API project with `WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_WELCOME_TEMPLATE`, `WHATSAPP_TEMPLATE_LANGUAGE`, `WHATSAPP_GRAPH_VERSION`, and `WHATSAPP_DEFAULT_COUNTRY_CODE`. The template body must accept the customer's name as `{{1}}`; a suitable message is: `Welcome to SJ Guppy Paradise, {{1}}! You are successfully registered. Book your guppy order here: https://sj-guppy-paradise.vercel.app`.
+
 ## Postman API testing
 
 Import the collection and environment from the `postman` folder. Detailed request order, examples, allowed status values, authentication behaviour, and media-upload steps are provided in `POSTMAN_API_GUIDE.md`.
