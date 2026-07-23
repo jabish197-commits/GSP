@@ -7,6 +7,7 @@ A complete responsive guppy catalogue and enquiry system with a separate private
 - Mobile and desktop customer website
 - Searchable live fish catalogue and fish detail pages
 - Customer enquiry list and order request form
+- Customer email/password, Google, and Facebook authentication
 - AI FAQ assistant with safe catalogue-aware answers
 - Human-chat request that stays pending until the admin accepts it
 - Private admin authentication using an HTTP-only cookie
@@ -51,6 +52,10 @@ Update the three `.env` files with these production addresses before deploying. 
 ## Verification
 
 Run `npm run check`. This creates production builds for both websites and checks the backend entry files.
+
+## Social customer login
+
+Google and Facebook customer login setup is documented in `SOCIAL_LOGIN_SETUP.md`. OAuth client secrets must be stored only in the API deployment environment.
 
 ## Postman API testing
 

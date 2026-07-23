@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, Navigate, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
-import { api } from "./services/api.js";
+import { api, apiUrl } from "./services/api.js";
 import FishGallery from "./components/fish/FishGallery.jsx";
+import PrivacyPolicy from "./pages/PrivacyPolicy.jsx";
+import DataDeletion from "./pages/DataDeletion.jsx";
 
 const demoFish = [
   { _id: "demo-1", slug: "mosaic-dumbo", name: "Mosaic Dumbo", strain: "Premium Mosaic", price: 650, quantity: 4, sex: "pair", status: "available", featured: true, description: "Broad patterned tails, graceful dumbo fins, and strong active movement.", media: [{ url: "/fish/mosaic-dumbo.jpg", type: "image", alt: "Mosaic Dumbo guppy pair" }] },
@@ -44,7 +46,7 @@ function Header({ cartCount, customer, logout, settings }) {
 }
 
 function Footer({ settings }) {
-  return <footer id="contact"><div><img src="/logo.png" alt=""/><p>Healthy guppies, honest guidance, and breeder-direct care.</p>{settings.instagramUrl&&<a className="instagram-link" href={settings.instagramUrl} target="_blank" rel="noreferrer" aria-label="Visit SJ Guppy Paradise on Instagram"><span aria-hidden="true">◎</span> Follow us on Instagram</a>}</div><div><h4>Visit & contact</h4><p>{settings.location || "Location shared during order confirmation"}</p><p>{settings.phone || "Phone number coming soon"}</p><p>{settings.email || "Email coming soon"}</p></div><div><h4>Customer promise</h4><p>Availability and safe delivery are confirmed before payment.</p></div><small>© {new Date().getFullYear()} SJ Guppy Paradise. Freshwater tropical fish.</small></footer>;
+  return <footer id="contact"><div><img src="/logo.png" alt=""/><p>Healthy guppies, honest guidance, and breeder-direct care.</p>{settings.instagramUrl&&<a className="instagram-link" href={settings.instagramUrl} target="_blank" rel="noreferrer" aria-label="Visit SJ Guppy Paradise on Instagram"><span aria-hidden="true">◎</span> Follow us on Instagram</a>}</div><div><h4>Visit & contact</h4><p>{settings.location || "Location shared during order confirmation"}</p><p>{settings.phone || "Phone number coming soon"}</p><p>{settings.email || "Email coming soon"}</p></div><div><h4>Customer promise</h4><p>Availability and safe delivery are confirmed before payment.</p><p className="footer-policies"><Link to="/privacy">Privacy</Link><Link to="/data-deletion">Data deletion</Link></p></div><small>© {new Date().getFullYear()} SJ Guppy Paradise. Freshwater tropical fish.</small></footer>;
 }
 
 function FishCard({ fish, add }) {
@@ -120,8 +122,11 @@ function CustomerAuth({ mode, onAuthenticated }) {
   const location = useLocation();
   const registering = mode === "register";
   const [form, setForm] = useState({ name: "", email: "", phone: "", password: "", confirmPassword: "" });
-  const [error, setError] = useState("");
+  const [error, setError] = useState(() => new URLSearchParams(location.search).get("oauthError") || "");
   const [busy, setBusy] = useState(false);
+  const startSocialLogin = () => {
+    sessionStorage.setItem("sj_oauth_return_to", location.state?.from || "/account");
+  };
   const submit = async (event) => {
     event.preventDefault();
     setError("");
@@ -140,7 +145,23 @@ function CustomerAuth({ mode, onAuthenticated }) {
       setBusy(false);
     }
   };
-  return <main className="auth-page"><section className="auth-card"><img src="/logo.png" alt="SJ Guppy Paradise"/><p className="eyebrow">CUSTOMER ACCOUNT</p><h1>{registering ? "Create your account" : "Welcome back"}</h1><p>{registering ? "Register to send enquiries and follow their status." : "Sign in to view your enquiries and account."}</p><form onSubmit={submit}>{registering&&<label>Full name<input required autoComplete="name" value={form.name} onChange={e=>setForm({...form,name:e.target.value})}/></label>}<label>Email<input required type="email" autoComplete="email" value={form.email} onChange={e=>setForm({...form,email:e.target.value})}/></label>{registering&&<label>Phone / WhatsApp<input required autoComplete="tel" value={form.phone} onChange={e=>setForm({...form,phone:e.target.value})}/></label>}<label>Password<input required minLength="8" type="password" autoComplete={registering?"new-password":"current-password"} value={form.password} onChange={e=>setForm({...form,password:e.target.value})}/></label>{registering&&<label>Confirm password<input required minLength="8" type="password" autoComplete="new-password" value={form.confirmPassword} onChange={e=>setForm({...form,confirmPassword:e.target.value})}/></label>}{error&&<p className="error">{error}</p>}<button className="primary full" disabled={busy}>{busy?"Please wait…":registering?"Create account":"Login securely"}</button></form><p className="auth-switch">{registering?"Already registered?":"New customer?"} <Link to={registering?"/login":"/register"}>{registering?"Login":"Create an account"}</Link></p></section></main>;
+  return <main className="auth-page"><section className="auth-card"><img src="/logo.png" alt="SJ Guppy Paradise"/><p className="eyebrow">CUSTOMER ACCOUNT</p><h1>{registering ? "Create your account" : "Welcome back"}</h1><p>{registering ? "Register to send enquiries and follow their status." : "Sign in to view your enquiries and account."}</p><div className="social-auth"><a className="social-login google" href={apiUrl("/customer-auth/oauth/google/start")} onClick={startSocialLogin}><span aria-hidden="true"><i></i><i></i><i></i><i></i></span>Continue with Google</a><a className="social-login facebook" href={apiUrl("/customer-auth/oauth/facebook/start")} onClick={startSocialLogin}><span aria-hidden="true">f</span>Continue with Facebook</a></div><div className="auth-divider"><span>or use email</span></div>{error&&<p className="error">{error}</p>}<form onSubmit={submit}>{registering&&<label>Full name<input required autoComplete="name" value={form.name} onChange={e=>setForm({...form,name:e.target.value})}/></label>}<label>Email<input required type="email" autoComplete="email" value={form.email} onChange={e=>setForm({...form,email:e.target.value})}/></label>{registering&&<label>Phone / WhatsApp<input required autoComplete="tel" value={form.phone} onChange={e=>setForm({...form,phone:e.target.value})}/></label>}<label>Password<input required minLength="8" type="password" autoComplete={registering?"new-password":"current-password"} value={form.password} onChange={e=>setForm({...form,password:e.target.value})}/></label>{registering&&<label>Confirm password<input required minLength="8" type="password" autoComplete="new-password" value={form.confirmPassword} onChange={e=>setForm({...form,confirmPassword:e.target.value})}/></label>}<button className="primary full" disabled={busy}>{busy?"Please wait…":registering?"Create account":"Login securely"}</button></form><p className="auth-switch">{registering?"Already registered?":"New customer?"} <Link to={registering?"/login":"/register"}>{registering?"Login":"Create an account"}</Link></p></section></main>;
+}
+
+function SocialAuthCallback({ onAuthenticated }) {
+  const navigate = useNavigate();
+  const [error, setError] = useState("");
+  useEffect(() => {
+    api("/customer-auth/me")
+      .then(({ customer }) => {
+        onAuthenticated(customer);
+        const returnTo = sessionStorage.getItem("sj_oauth_return_to") || "/account";
+        sessionStorage.removeItem("sj_oauth_return_to");
+        navigate(returnTo.startsWith("/") && !returnTo.startsWith("//") ? returnTo : "/account", { replace: true });
+      })
+      .catch((value) => setError(value.message));
+  }, [navigate, onAuthenticated]);
+  return <main className="auth-page"><section className="auth-card social-callback"><img src="/logo.png" alt="SJ Guppy Paradise"/>{error?<><h1>Sign-in failed</h1><p className="error">{error}</p><Link className="primary full" to="/login">Return to login</Link></>:<><span className="auth-spinner" aria-hidden="true"></span><h1>Signing you in…</h1><p>Securely connecting your customer account.</p></>}</section></main>;
 }
 
 function PaymentTracker({order}) {
@@ -153,7 +174,7 @@ function PaymentTracker({order}) {
 
 function CustomerAccountContent({ customer, logout, onUpdated = () => window.location.reload() }) {
   const [orders,setOrders]=useState([]),[loading,setLoading]=useState(true),[error,setError]=useState("");
-  const [editing,setEditing]=useState(false),[saving,setSaving]=useState(false),[saved,setSaved]=useState(false);
+  const [editing,setEditing]=useState(!customer.phone),[saving,setSaving]=useState(false),[saved,setSaved]=useState(false);
   const [form,setForm]=useState({name:customer.name,phone:customer.phone,avatar:null});
   const [preview,setPreview]=useState(customer.avatar?.url||"");
   const loadOrders=()=>api("/orders/mine").then(data=>setOrders(data.orders)).catch(value=>setError(value.message)).finally(()=>setLoading(false));
@@ -213,5 +234,5 @@ export default function App() {
   };
   const updateItem = (id, changes) => setCart(items=>items.map(item=>item._id===id?{...item,...changes}:item));
   const logout = async () => { await api("/customer-auth/logout", { method: "POST" }).catch(()=>{}); setCustomer(null); };
-  return <><ScrollToTop/><Header cartCount={cart.length} customer={customer} logout={logout} settings={settings}/>{enquiryNotice&&<div className="enquiry-toast" role="status" aria-live="polite"><span>✓</span><div><b>{enquiryNotice.alreadyAdded?"Already in enquiry":"Added to enquiry"}</b><small>{enquiryNotice.name}</small></div><Link to="/enquiry" onClick={()=>setEnquiryNotice(null)}>View</Link><button type="button" onClick={()=>setEnquiryNotice(null)} aria-label="Dismiss notification">×</button></div>}<Routes><Route path="/" element={<Home fish={fish} add={add} settings={settings}/>}/><Route path="/collection" element={<Collection fish={fish} add={add}/>}/><Route path="/fish/:slug" element={<FishDetails fish={fish} add={add}/>}/><Route path="/login" element={customer?<Navigate to="/account" replace/>:<CustomerAuth mode="login" onAuthenticated={setCustomer}/>}/><Route path="/register" element={customer?<Navigate to="/account" replace/>:<CustomerAuth mode="register" onAuthenticated={setCustomer}/>}/><Route path="/account" element={<RequireCustomer customer={customer} loading={authLoading}><CustomerAccount customer={customer} logout={logout}/></RequireCustomer>}/><Route path="/enquiry" element={<RequireCustomer customer={customer} loading={authLoading}><Enquiry customer={customer} settings={settings} cart={cart} updateItem={updateItem} remove={(id)=>setCart(cart.filter((item)=>item._id!==id))} clear={()=>setCart([])}/></RequireCustomer>}/><Route path="*" element={<main className="page empty"><h1>Page not found</h1><Link to="/">Go home</Link></main>}/></Routes><Footer settings={settings}/><ChatWidget customer={customer}/></>;
+  return <><ScrollToTop/><Header cartCount={cart.length} customer={customer} logout={logout} settings={settings}/>{enquiryNotice&&<div className="enquiry-toast" role="status" aria-live="polite"><span>✓</span><div><b>{enquiryNotice.alreadyAdded?"Already in enquiry":"Added to enquiry"}</b><small>{enquiryNotice.name}</small></div><Link to="/enquiry" onClick={()=>setEnquiryNotice(null)}>View</Link><button type="button" onClick={()=>setEnquiryNotice(null)} aria-label="Dismiss notification">×</button></div>}<Routes><Route path="/" element={<Home fish={fish} add={add} settings={settings}/>}/><Route path="/collection" element={<Collection fish={fish} add={add}/>}/><Route path="/fish/:slug" element={<FishDetails fish={fish} add={add}/>}/><Route path="/privacy" element={<PrivacyPolicy/>}/><Route path="/data-deletion" element={<DataDeletion/>}/><Route path="/login" element={customer?<Navigate to="/account" replace/>:<CustomerAuth mode="login" onAuthenticated={setCustomer}/>}/><Route path="/register" element={customer?<Navigate to="/account" replace/>:<CustomerAuth mode="register" onAuthenticated={setCustomer}/>}/><Route path="/auth/callback" element={<SocialAuthCallback onAuthenticated={setCustomer}/>}/><Route path="/account" element={<RequireCustomer customer={customer} loading={authLoading}><CustomerAccount customer={customer} logout={logout}/></RequireCustomer>}/><Route path="/enquiry" element={<RequireCustomer customer={customer} loading={authLoading}><Enquiry customer={customer} settings={settings} cart={cart} updateItem={updateItem} remove={(id)=>setCart(cart.filter((item)=>item._id!==id))} clear={()=>setCart([])}/></RequireCustomer>}/><Route path="*" element={<main className="page empty"><h1>Page not found</h1><Link to="/">Go home</Link></main>}/></Routes><Footer settings={settings}/><ChatWidget customer={customer}/></>;
 }

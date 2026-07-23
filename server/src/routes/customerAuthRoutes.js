@@ -6,6 +6,14 @@ import { requireCustomer } from "../middleware/customerAuth.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { clearSessionCookieOptions, sessionCookieOptions } from "../utils/cookieOptions.js";
 import { deleteMedia, uploadBuffer } from "../services/mediaService.js";
+import {
+  customerAuthRedirect,
+  findOrCreateOAuthCustomer,
+  oauthAuthorizationUrl,
+  oauthProfile,
+  oauthProviderName,
+  oauthState,
+} from "../services/customerOAuthService.js";
 
 const router = Router();
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -16,7 +24,14 @@ const avatarUpload = multer({
 });
 
 function publicCustomer(customer) {
-  return { id: customer.id, name: customer.name, email: customer.email, phone: customer.phone, avatar: customer.avatar || { url: "", publicId: "" } };
+  return {
+    id: customer.id,
+    name: customer.name,
+    email: customer.email,
+    phone: customer.phone,
+    avatar: customer.avatar || { url: "", publicId: "" },
+    profileComplete: Boolean(customer.phone),
+  };
 }
 
 function setSession(response, customer) {
@@ -27,6 +42,53 @@ function setSession(response, customer) {
   );
   response.cookie("sj_customer_token", token, sessionCookieOptions(7 * 24 * 60 * 60 * 1000));
 }
+
+function oauthCookieOptions(maxAge) {
+  return {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/api/customer-auth/oauth",
+    ...(maxAge ? { maxAge } : {}),
+  };
+}
+
+router.get("/oauth/:provider/start", asyncHandler(async (request, response) => {
+  const provider = String(request.params.provider || "").toLowerCase();
+  const state = oauthState();
+  const authorizationUrl = oauthAuthorizationUrl(provider, state);
+  response.cookie("sj_oauth_state", `${provider}:${state}`, oauthCookieOptions(10 * 60 * 1000));
+  response.redirect(authorizationUrl);
+}));
+
+router.get("/oauth/:provider/callback", async (request, response) => {
+  const provider = String(request.params.provider || "").toLowerCase();
+  const providerName = oauthProviderName(provider);
+  const fail = (message) => response.redirect(
+    customerAuthRedirect(`/login?oauthError=${encodeURIComponent(message)}`),
+  );
+
+  try {
+    if (!["google", "facebook"].includes(provider)) return fail("Unsupported social login provider.");
+    if (request.query.error) {
+      return fail(`${providerName} sign-in was cancelled or not approved.`);
+    }
+    const expectedState = request.cookies?.sj_oauth_state;
+    const receivedState = String(request.query.state || "");
+    response.clearCookie("sj_oauth_state", oauthCookieOptions());
+    if (!expectedState || expectedState !== `${provider}:${receivedState}`) {
+      return fail("The social login request expired. Please try again.");
+    }
+    const code = String(request.query.code || "");
+    if (!code) return fail(`${providerName} did not return a login code.`);
+    const profile = await oauthProfile(provider, code);
+    const customer = await findOrCreateOAuthCustomer(profile);
+    setSession(response, customer);
+    return response.redirect(customerAuthRedirect(`/auth/callback?provider=${provider}`));
+  } catch (error) {
+    return fail(error.message || `${providerName} sign-in failed.`);
+  }
+});
 
 router.post("/register", asyncHandler(async (request, response) => {
   const name = String(request.body.name || "").trim();

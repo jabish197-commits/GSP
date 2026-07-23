@@ -11,6 +11,10 @@ function resolveApiUrl() {
 
 const API_URL = resolveApiUrl();
 
+export function apiUrl(path = "") {
+  return `${API_URL}${path}`;
+}
+
 export async function api(path, options = {}) {
   const isForm = options.body instanceof FormData;
   let response;
